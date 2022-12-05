@@ -51,11 +51,11 @@ type Stack = {
     Number: StackId
     Crates: Crate list
 }
-
-let tryGetStack (c:char) : char option =
-    match c with
-    | Char.IsUpper x -> Some x
-    | _ -> None
+//
+// let tryGetStack (c:char) : char option =
+//     match c with
+//     | Char.IsUpper x -> Some x
+//     | _ -> None
 
 let tryGetStack' (c:char) : char option =
     match c with
