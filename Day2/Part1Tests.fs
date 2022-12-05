@@ -6,6 +6,8 @@ open Swensen.Unquote
 [<Literal>]
 let input = "../../../input.txt"
 
+/// 1st value -> Opponent's selection
+/// 2nd value -> proposed selection
 let sampleData =
     [
         "A Y"
@@ -14,56 +16,72 @@ let sampleData =
     ]
 
 type RPS = | Rock | Paper | Scissors
-type Player =
-    | PlayerSelf of RPS
-    | Opponent of RPS
+type State = | Win | Loose | Tie
+type Round = {
+    Player: RPS
+    Opponent: RPS
+}
 
-let calcRound (s:string) : int =
+let tryToRound (s:string) =
     let opponentVal = s[0]
     let playerVal = s[2]
-    let opponent =
-        match opponentVal with
-        | c when c = 'A' -> Opponent Rock 
-        | c when c = 'B' -> Opponent Paper 
-        | _ -> Opponent Scissors
-    let player =
-        match playerVal with
-        | c when c = 'X' -> PlayerSelf Rock
-        | c when c = 'Y' -> PlayerSelf Paper
-        | _ -> PlayerSelf Scissors
+    let tryToRpc c =
+        if c = 'A' || c = 'X' then Some Rock
+        else if c = 'B' || c = 'Y' then Some Paper
+        else if c = 'C' || c = 'Z' then Some Scissors
+        else None
+    match (playerVal |> tryToRpc), (opponentVal |> tryToRpc) with
+    | None, _ -> None
+    | _, None -> None
+    | Some player, Some opponent ->
+        {
+            Player = player
+            Opponent = opponent
+        } |> Some
+
+let calcRound (round:Round) =
+    let calc first second =
+        let roundState =
+            match first, second with
+            | Rock, Rock -> Tie
+            | Rock, Paper -> Loose
+            | Rock, Scissors -> Win
+            | Paper, Rock -> Win
+            | Paper, Paper -> Tie
+            | Paper, Scissors -> Loose
+            | Scissors, Rock -> Loose
+            | Scissors, Paper -> Win
+            | Scissors, Scissors -> Tie
+        let selection =
+            match first with
+            | Rock -> 1
+            | Paper -> 2
+            | Scissors -> 3
+        match roundState with
+        | Loose -> selection + 0
+        | Tie -> selection + 3
+        | Win -> selection + 6
         
-    let result =
-        match player, opponent with
-        | PlayerSelf Rock, Opponent Rock -> 1+3
-        | PlayerSelf Paper, Opponent Rock -> 2+6
-        | PlayerSelf Scissors, Opponent Rock -> 3+0
-        | PlayerSelf Rock, Opponent Paper -> 1+0
-        | PlayerSelf Paper, Opponent Paper -> 2+3
-        | PlayerSelf Scissors, Opponent Paper -> 3+6
-        | PlayerSelf Rock, Opponent Scissors -> 1+6
-        | PlayerSelf Paper, Opponent Scissors -> 2+0
-        | PlayerSelf Scissors, Opponent Scissors -> 3+3
-        | _ -> 0
-    result
-    
-let calcTotal xs =
-    xs |> List.map calcRound |> List.sum
+    calc round.Player round.Opponent
 
 [<Fact>]
 let ``Sample data`` () =
     let actual =
         sampleData
-        |> calcTotal 
+        |> List.choose tryToRound
+        |> List.map calcRound
+        |> List.sum 
     let expected = 15
     actual =! expected
     
 [<Fact>]
 let ``actual data`` () =
-    let lines = System.IO.File.ReadAllLines(input)
     let actual =
-        lines
+        System.IO.File.ReadAllLines(input)
         |> List.ofArray
-        |> calcTotal 
-    let expected = 15 // 11386
+        |> List.choose tryToRound
+        |> List.map calcRound
+        |> List.sum
+    let expected = 11386
     actual =! expected
     
