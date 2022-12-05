@@ -68,22 +68,21 @@ let ``Playground 2`` () =
     let expected = false
     actual =! expected
     
+
+let isContained row =
+    let pattern = @"(?<s1>\d+)-(?<e1>\d+),(?<s2>\d+)-(?<e2>\d+)"
+    let reg = Regex(pattern, RegexOptions.Compiled)
+    let matches = reg.Match row
+    let s1 = matches.Groups["s1"] |> string |> int
+    let s2 = matches.Groups["s2"] |> string |> int
+    let e1 = matches.Groups["e1"] |> string |> int
+    let e2 = matches.Groups["e2"] |> string |> int
+
+    if s1 >= s2 && e1 <= e2 then true
+    else s2 >= s1 && e2 <= e1
    
 [<Fact>]
 let ``sample data`` () =
-    
-    let isContained row =
-        let pattern = @"(?<s1>\d+)-(?<e1>\d+),(?<s2>\d+)-(?<e2>\d+)"
-        let reg = Regex(pattern, RegexOptions.Compiled)
-        let matches = reg.Match row
-        let s1 = matches.Groups["s1"] |> string |> int
-        let s2 = matches.Groups["s2"] |> string |> int
-        let e1 = matches.Groups["e1"] |> string |> int
-        let e2 = matches.Groups["e2"] |> string |> int
-    
-        if s1 >= s2 && e1 <= e2 then true
-        else s2 >= s1 && e2 <= e1
-    
     let actual =
         sampleData
         |> List.map isContained
@@ -95,19 +94,6 @@ let ``sample data`` () =
        
 [<Fact>]
 let ``actual data`` () =
-    
-    let isContained row =
-        let pattern = @"(?<s1>\d+)-(?<e1>\d+),(?<s2>\d+)-(?<e2>\d+)"
-        let reg = Regex(pattern, RegexOptions.Compiled)
-        let matches = reg.Match row
-        let s1 = matches.Groups["s1"] |> string |> int
-        let s2 = matches.Groups["s2"] |> string |> int
-        let e1 = matches.Groups["e1"] |> string |> int
-        let e2 = matches.Groups["e2"] |> string |> int
-    
-        if s1 >= s2 && e1 <= e2 then true
-        else s2 >= s1 && e2 <= e1
-    
     let actual =
         System.IO.File.ReadAllLines(input)
         |> List.ofArray

@@ -10,6 +10,7 @@
     <ItemGroup>
         <Content Include="input.txt" />
         <Compile Include="Part1Tests.fs" />
+        <Compile Include="Part2Tests.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
